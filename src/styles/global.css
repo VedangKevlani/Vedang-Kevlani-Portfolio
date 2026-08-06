@@ -1,0 +1,83 @@
+:root {
+  --black:        #141414;
+  --surface:      #1E1E1E;
+  --border:       #1E1E1E;
+  --parchment:    #E8E0D0;
+  --parchment-dim:#7A7268;
+  --gold:         #D4A853;
+  --gold-dim:     #8A6D38;
+  --ocean:        #2A6EA8;
+  --ocean-light:  #4AA0D8;
+  --emerald:      #2D6A4F;
+  --emerald-light:#52B788;
+  --sand:         #C8B89A;
+  --sand-light:   #E2D5C0;
+  --rust:         #C1652F;
+  --font-display: 'Manrope', -apple-system, sans-serif;
+  --font-serif:   'Cormorant Garamond', Georgia, serif;
+  --font-label:   'DM Sans', -apple-system, sans-serif;
+  --font-mono:    'DM Mono', 'Courier New', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--black);
+  color: var(--parchment);
+  overscroll-behavior: none;
+}
+
+body { font-family: var(--font-label); font-weight: 300; overflow: hidden; }
+
+#root { height: 100vh; overflow: hidden; }
+
+/* The whole site is one slide deck: a JS-driven track (see SlideDeck.tsx)
+   moves via transform so one wheel/touch/key gesture = one chapter, in
+   either direction, with the video pinned fixed behind it throughout. */
+.slide {
+  height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Film grain */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9000;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px;
+  mix-blend-mode: screen;
+}
+
+/* Dark video overlay so text always reads — fixed, sits over the pinned video layers */
+.video-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(20,20,20,0.85) 0%,
+    rgba(20,20,20,0.55) 45%,
+    rgba(20,20,20,0.20) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Scrollbar hidden */
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+
+::selection { background: var(--gold); color: var(--black); }
+
+/* Cut flash on section change — a beat of black between scenes */
+@keyframes chapterCutFlash {
+  from { opacity: 0.16; }
+  to   { opacity: 0; }
+}
+.chapter-flash { animation: chapterCutFlash 0.4s ease-out; }
