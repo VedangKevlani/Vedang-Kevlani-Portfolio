@@ -1,10 +1,10 @@
-interface Props { current: number; total: number; accent?: string }
+interface Props { current: number; total: number; accent?: string; compact?: boolean }
 
-export default function FrameCounter({ current, total, accent = '#D4A853' }: Props) {
+export default function FrameCounter({ current, total, accent = '#D4A853', compact = false }: Props) {
   const pad = (n: number) => String(n).padStart(3, '0')
   return (
     <div style={{
-      position: 'fixed', top: '1.75rem', right: '2.25rem',
+      position: 'fixed', top: compact ? '1rem' : '1.75rem', right: compact ? '1rem' : '2.25rem',
       zIndex: 1000,
       fontFamily: 'var(--font-mono)',
       fontSize: '0.575rem',

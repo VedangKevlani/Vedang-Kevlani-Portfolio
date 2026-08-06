@@ -1,5 +1,6 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NAV, projects, roles, awards } from '../data/content'
+import { useViewport } from '../lib/useViewport'
 import { IntroContent } from '../sections/IntroSection'
 import { ProjectChapter } from '../sections/MoviesSection'
 import { RoleChapter } from '../sections/CastingSection'
@@ -97,6 +98,7 @@ const TRANSITION_MS = 750
 const WHEEL_ADVANCE_THRESHOLD = 12
 
 export default function SlideDeck() {
+  const { isMobile, isTablet, isTouch } = useViewport()
   const trackRef = useRef<HTMLDivElement>(null)
   const flashRef = useRef<HTMLDivElement>(null)
   const activeSlideRef = useRef(0)
@@ -250,6 +252,20 @@ export default function SlideDeck() {
   const isLastSlide = activeSlide === SLIDES.length - 1
   const progressPct = (activeSlide / Math.max(1, SLIDES.length - 1)) * 100
 
+  // Desktop leans on vw so the cinematic proportions scale with the window;
+  // phones/tablets get fixed rem gutters instead so side chrome (nav rail,
+  // chapter rail) always has clearance and content never gets pinched.
+  const gutterLeft = isMobile ? '4.75rem' : isTablet ? '6.5rem' : '12vw'
+  const gutterRightFor = (railPresent: boolean) => isMobile
+    ? (railPresent ? '3rem' : '1.5rem')
+    : isTablet
+      ? (railPresent ? '6rem' : '4rem')
+      : (railPresent ? '11vw' : '8vw')
+  const gutterRight = gutterRightFor(hasRail)
+  const barPadding = isMobile ? '0 1rem' : isTablet ? '0 1.5rem' : '0 2.25rem'
+  const barFontSize = isMobile ? '0.6rem' : '0.75rem'
+  const headerTop = isMobile ? 'calc(4.5vh + 1.25rem)' : isTablet ? 'calc(4.5vh + 2rem)' : 'calc(4.5vh + 2.75rem)'
+
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100%', background: '#000', overflow: 'hidden' }}>
       {/* Video layers — one persistent element per clip, pinned to the viewport. */}
@@ -290,13 +306,13 @@ export default function SlideDeck() {
         background: '#0A0A08', zIndex: 4, borderTop: `1px solid ${slide.accent}33`,
         transition: 'border-color 0.6s ease',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 2.25rem',
+        padding: barPadding,
       }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.12em', color: 'rgba(245,239,227,0.55)' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: barFontSize, letterSpacing: '0.12em', color: 'rgba(245,239,227,0.55)', whiteSpace: 'nowrap' }}>
           {slide.chapterLabel} <span style={{ color: slide.accent, transition: 'color 0.6s ease' }}>{String(slide.chapterIndex + 1).padStart(2, '0')}</span>
           {' '}/ {String(slide.chapterCount).padStart(2, '0')}
         </span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.12em', color: 'rgba(245,239,227,0.55)' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: barFontSize, letterSpacing: '0.12em', color: 'rgba(245,239,227,0.55)', whiteSpace: 'nowrap' }}>
           {String(activeSlide + 1).padStart(2, '0')} / {String(SLIDES.length).padStart(2, '0')}
         </span>
       </div>
@@ -308,10 +324,13 @@ export default function SlideDeck() {
 
       {/* Persistent per-section header */}
       {hasHeader && (
-        <div style={{ position: 'fixed', top: 'calc(4.5vh + 2.75rem)', left: '12vw', zIndex: 3 }}>
+        <div style={{
+          position: 'fixed', top: headerTop, left: gutterLeft, zIndex: 3,
+          maxWidth: `calc(100vw - ${gutterLeft} - ${gutterRight})`,
+        }}>
           {slide.actLabel && (
             <div style={{
-              fontFamily: 'var(--font-label)', fontSize: '0.85rem',
+              fontFamily: 'var(--font-label)', fontSize: isMobile ? '0.68rem' : '0.85rem',
               letterSpacing: '0.2em', textTransform: 'uppercase',
               color: slide.accent, marginBottom: '0.6rem', fontWeight: 600,
               transition: 'color 0.6s ease',
@@ -322,7 +341,8 @@ export default function SlideDeck() {
           {slide.heading && (
             <h2 style={{
               fontFamily: 'var(--font-display)', fontWeight: 400,
-              fontSize: 'clamp(1.5rem, 2.3vw, 2.1rem)',
+              fontSize: isMobile ? 'clamp(1.05rem, 5.5vw, 1.4rem)' : 'clamp(1.5rem, 2.3vw, 2.1rem)',
+              lineHeight: 1.2,
               color: '#F5EFE3', letterSpacing: '-0.02em',
               textShadow: '0 2px 16px rgba(0,0,0,0.5)',
             }}>
@@ -338,12 +358,13 @@ export default function SlideDeck() {
           onClick={() => goTo(0)}
           style={{
             all: 'unset', cursor: 'pointer',
-            position: 'fixed', right: '12vw', bottom: 'calc(4.5vh + 3rem)', zIndex: 3,
+            position: 'fixed', right: isMobile ? '1.5rem' : isTablet ? '4rem' : '12vw',
+            bottom: isMobile ? 'calc(4.5vh + 2rem)' : 'calc(4.5vh + 3rem)', zIndex: 3,
             display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
-            fontFamily: 'var(--font-label)', fontSize: '0.78rem', fontWeight: 600,
-            letterSpacing: '0.1em', textTransform: 'uppercase',
+            fontFamily: 'var(--font-label)', fontSize: isMobile ? '0.68rem' : '0.78rem', fontWeight: 600,
+            letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap',
             color: slide.accent, border: `1px solid ${slide.accent}66`,
-            padding: '0.7rem 1.15rem', borderRadius: '999px',
+            padding: isMobile ? '0.6rem 0.9rem' : '0.7rem 1.15rem', borderRadius: '999px',
             background: 'rgba(0,0,0,0.35)', transition: 'background 0.25s ease, border-color 0.25s ease',
           }}
           onMouseEnter={e => {
@@ -363,7 +384,7 @@ export default function SlideDeck() {
       {/* Chapter rail — click to jump within the active section */}
       {hasRail && (
         <div style={{
-          position: 'fixed', right: '2.75rem', top: '50%',
+          position: 'fixed', right: isMobile ? '1rem' : isTablet ? '1.5rem' : '2.75rem', top: '50%',
           transform: 'translateY(-50%)', zIndex: 3,
           display: 'flex', flexDirection: 'column',
           gap: slide.chapterCount > 6 ? '0.65rem' : '1.05rem', alignItems: 'flex-end',
@@ -375,13 +396,15 @@ export default function SlideDeck() {
               aria-label={`${slide.chapterLabel} ${i + 1}`}
               style={{ all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem' }}
             >
-              <span style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.08em',
-                color: i === slide.chapterIndex ? slide.accent : 'transparent',
-                transition: 'color 0.4s ease', whiteSpace: 'nowrap',
-              }}>
-                {String(i + 1).padStart(2, '0')}
-              </span>
+              {!isTouch && (
+                <span style={{
+                  fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.08em',
+                  color: i === slide.chapterIndex ? slide.accent : 'transparent',
+                  transition: 'color 0.4s ease', whiteSpace: 'nowrap',
+                }}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+              )}
               <div style={{
                 width: '1px', height: i === slide.chapterIndex ? '1.5rem' : '0.7rem',
                 background: i === slide.chapterIndex ? slide.accent : 'rgba(245,239,227,0.3)',
@@ -393,9 +416,9 @@ export default function SlideDeck() {
       )}
 
       {/* Global chrome */}
-      <FilmNav sections={NAV} active={slide.sectionIndex} onNavigate={jumpToSection} accent={slide.accent} />
-      <FrameCounter current={slide.sectionIndex + 1} total={NAV.length} accent={slide.accent} />
-      <SceneLabel label={NAV[slide.sectionIndex]?.scene ?? ''} />
+      <FilmNav sections={NAV} active={slide.sectionIndex} onNavigate={jumpToSection} accent={slide.accent} isTouch={isTouch} compact={isMobile} />
+      <FrameCounter current={slide.sectionIndex + 1} total={NAV.length} accent={slide.accent} compact={isMobile} />
+      <SceneLabel label={NAV[slide.sectionIndex]?.scene ?? ''} compact={isMobile} />
 
       {/* Slide track — fully JS-driven so one gesture = one chapter, in
           either direction. Position is a transform, not native scroll. */}
@@ -408,18 +431,33 @@ export default function SlideDeck() {
             transition: `transform ${TRANSITION_MS}ms cubic-bezier(0.65, 0, 0.35, 1)`,
           }}
         >
-          {SLIDES.map((s, i) => (
-            <section key={i} id={s.isSectionStart ? s.sectionId : undefined} className="slide">
-              <div style={{
-                width: '100%', paddingLeft: '12vw', paddingRight: s.chapterCount > 1 ? '11vw' : '8vw',
-                opacity: i === activeSlide ? 1 : 0,
-                transform: i === activeSlide ? 'translateY(0)' : 'translateY(16px)',
-                transition: 'opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s',
-              }}>
-                {s.content}
-              </div>
-            </section>
-          ))}
+          {SLIDES.map((s, i) => {
+            // The Stalking chapter stacks into a single tall column on
+            // touch layouts (stats + radar + tools no longer fit side by
+            // side) — tall enough to reach the fixed header if centered
+            // like every other slide, so it anchors to the top instead.
+            const isTallOnTouch = isTouch && s.sectionId === 'stalking'
+            return (
+              <section
+                key={i}
+                id={s.isSectionStart ? s.sectionId : undefined}
+                className="slide"
+                style={isTallOnTouch ? { alignItems: 'flex-start' } : undefined}
+              >
+                <div style={{
+                  width: '100%', maxWidth: '100%',
+                  paddingLeft: gutterLeft,
+                  paddingRight: gutterRightFor(s.chapterCount > 1),
+                  paddingTop: isTallOnTouch ? (isMobile ? 'calc(4.5vh + 6.75rem)' : 'calc(4.5vh + 7rem)') : undefined,
+                  opacity: i === activeSlide ? 1 : 0,
+                  transform: i === activeSlide ? 'translateY(0)' : 'translateY(16px)',
+                  transition: 'opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s',
+                }}>
+                  {s.content}
+                </div>
+              </section>
+            )
+          })}
         </div>
       </div>
     </div>

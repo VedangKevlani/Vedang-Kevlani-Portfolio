@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
+import { useViewport } from '../lib/useViewport'
 
 export function IntroContent() {
+  const { isMobile } = useViewport()
   const nameRef = useRef<HTMLHeadingElement>(null)
   const subRef  = useRef<HTMLDivElement>(null)
   const metaRef = useRef<HTMLDivElement>(null)
@@ -40,9 +42,9 @@ export function IntroContent() {
     <div style={{ maxWidth: '60rem' }}>
       {/* Eyebrow */}
       <div ref={metaRef} style={{
-        fontFamily: 'var(--font-label)', fontSize: '0.85rem',
+        fontFamily: 'var(--font-label)', fontSize: isMobile ? '0.68rem' : '0.85rem',
         letterSpacing: '0.28em', textTransform: 'uppercase',
-        color: '#D4A853', marginBottom: '1.5rem', opacity: 0, fontWeight: 500,
+        color: '#D4A853', marginBottom: isMobile ? '1rem' : '1.5rem', opacity: 0, fontWeight: 500,
       }}>
         A Portfolio in Six Acts
       </div>
@@ -50,8 +52,9 @@ export function IntroContent() {
       {/* Name */}
       <h1 ref={nameRef} style={{
         fontFamily: 'var(--font-display)', fontWeight: 300,
-        fontSize: 'clamp(3.5rem, 7.5vw, 7rem)', lineHeight: 0.92,
-        color: '#F5EFE3', letterSpacing: '-0.03em', marginBottom: '2rem',
+        fontSize: isMobile ? 'clamp(2.5rem, 15vw, 4rem)' : 'clamp(3.5rem, 7.5vw, 7rem)',
+        lineHeight: 0.92,
+        color: '#F5EFE3', letterSpacing: '-0.03em', marginBottom: isMobile ? '1.25rem' : '2rem',
         textShadow: '0 2px 24px rgba(0,0,0,0.5)',
       }}>
         Vedang<br />
@@ -59,14 +62,14 @@ export function IntroContent() {
       </h1>
 
       {/* Disciplines */}
-      <div ref={subRef} style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+      <div ref={subRef} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: isMobile ? '0.75rem 1rem' : '1.5rem' }}>
         {['Computer Scientist', 'Builder', 'Educator'].map((d, i) => (
-          <span key={d} style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <span key={d} style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '1rem' : '1.5rem' }}>
             {i > 0 && <span style={{ width: '1.25rem', height: '1px', background: 'rgba(245,239,227,0.25)', display: 'inline-block' }} />}
             <span style={{
-              fontFamily: 'var(--font-label)', fontSize: '0.9rem',
+              fontFamily: 'var(--font-label)', fontSize: isMobile ? '0.75rem' : '0.9rem',
               letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 500,
-              color: i === 0 ? '#F5EFE3' : 'rgba(245,239,227,0.55)',
+              color: i === 0 ? '#F5EFE3' : 'rgba(245,239,227,0.55)', whiteSpace: 'nowrap',
             }}>
               {d}
             </span>
@@ -76,8 +79,8 @@ export function IntroContent() {
 
       {/* Fragment */}
       <div ref={lineRef} style={{
-        marginTop: '1.75rem', fontFamily: 'var(--font-display)', fontStyle: 'italic',
-        fontSize: '1.2rem', color: '#C9BFAD', letterSpacing: '0.005em',
+        marginTop: isMobile ? '1.25rem' : '1.75rem', fontFamily: 'var(--font-display)', fontStyle: 'italic',
+        fontSize: isMobile ? '1rem' : '1.2rem', color: '#C9BFAD', letterSpacing: '0.005em',
         lineHeight: 1.55, maxWidth: '30rem', opacity: 0,
       }}>
         Built to be used —<br />
@@ -86,7 +89,7 @@ export function IntroContent() {
 
       {/* Credential */}
       <div style={{
-        marginTop: '2.5rem', fontFamily: 'var(--font-label)', fontSize: '0.8rem',
+        marginTop: isMobile ? '1.5rem' : '2.5rem', fontFamily: 'var(--font-label)', fontSize: isMobile ? '0.68rem' : '0.8rem',
         letterSpacing: '0.06em', color: 'rgba(245,239,227,0.48)', lineHeight: 1.9,
       }}>
         B.Sc. Computer Science · Minor in Economics<br />

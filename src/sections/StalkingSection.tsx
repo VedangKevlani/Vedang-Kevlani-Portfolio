@@ -1,7 +1,8 @@
 import { skills } from '../data/content'
 import { hexToRgb } from '../lib/color'
+import { useViewport } from '../lib/useViewport'
 
-function RadarChart({ accent }: { accent: string }) {
+function RadarChart({ accent, size }: { accent: string; size: number }) {
   const cx = 170, cy = 170, r = 120
   const n = skills.radar.length
   const step = (Math.PI * 2) / n
@@ -16,7 +17,7 @@ function RadarChart({ accent }: { accent: string }) {
     .join(' ') + ' Z'
 
   return (
-    <svg viewBox="0 0 340 340" width="300" height="300">
+    <svg viewBox="0 0 340 340" width={size} height={size}>
       {[0.25, 0.5, 0.75, 1].map((ring, ri) => {
         const path = skills.radar
           .map((_, i) => `${i === 0 ? 'M' : 'L'} ${pt(i, ring).x} ${pt(i, ring).y}`)
@@ -54,26 +55,32 @@ function RadarChart({ accent }: { accent: string }) {
 
 export function StalkingContent({ accent }: { accent: string }) {
   const [r, g, b] = hexToRgb(accent)
+  const { isMobile, isTablet } = useViewport()
+  const radarSize = isMobile ? 148 : isTablet ? 230 : 300
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: '3.25rem' }}>
+    <div style={{
+      display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+      flexWrap: 'wrap', alignItems: isMobile ? 'stretch' : 'flex-start',
+      gap: isMobile ? '1.1rem' : '3.25rem', maxWidth: '100%',
+    }}>
       {/* Stats */}
-      <div style={{ flex: '1 1 19rem', minWidth: '17rem', maxWidth: '25rem' }}>
+      <div style={{ flex: isMobile ? 'none' : '1 1 19rem', minWidth: isMobile ? 0 : '17rem', maxWidth: isMobile ? '100%' : '25rem' }}>
         <div style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px',
           background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.06)',
         }}>
           {skills.stats.map((s, i) => (
-            <div key={i} style={{ background: 'rgba(8,8,7,0.6)', padding: '1.1rem 1.25rem' }}>
+            <div key={i} style={{ background: 'rgba(8,8,7,0.6)', padding: isMobile ? '0.55rem 0.75rem' : '1.1rem 1.25rem', minWidth: 0 }}>
               <div style={{
-                fontFamily: 'var(--font-display)', fontSize: '2.15rem', fontWeight: 700,
-                color: accent, lineHeight: 1, letterSpacing: '-0.02em', marginBottom: '0.4rem',
+                fontFamily: 'var(--font-display)', fontSize: isMobile ? '1.2rem' : '2.15rem', fontWeight: 700,
+                color: accent, lineHeight: 1, letterSpacing: '-0.02em', marginBottom: isMobile ? '0.2rem' : '0.4rem',
                 textShadow: '0 2px 16px rgba(0,0,0,0.5)',
               }}>
                 {s.value}
               </div>
               <div style={{
-                fontFamily: 'var(--font-label)', fontSize: '0.78rem', fontWeight: 500,
+                fontFamily: 'var(--font-label)', fontSize: isMobile ? '0.6rem' : '0.78rem', fontWeight: 500,
                 color: '#C9BFAD', letterSpacing: '0.06em', textTransform: 'uppercase',
               }}>
                 {s.label}
@@ -84,32 +91,32 @@ export function StalkingContent({ accent }: { accent: string }) {
       </div>
 
       {/* Radar */}
-      <div style={{ flex: '0 0 auto', margin: '0 auto' }}>
-        <RadarChart accent={accent} />
+      <div style={{ flex: '0 0 auto', margin: isMobile ? '0' : '0 auto' }}>
+        <RadarChart accent={accent} size={radarSize} />
       </div>
 
       {/* Tools */}
-      <div style={{ flex: '1 1 15rem', minWidth: '14rem', maxWidth: '21rem' }}>
+      <div style={{ flex: isMobile ? 'none' : '1 1 15rem', minWidth: isMobile ? 0 : '14rem', maxWidth: isMobile ? '100%' : '21rem' }}>
         <div style={{
-          fontFamily: 'var(--font-label)', fontSize: '0.82rem',
+          fontFamily: 'var(--font-label)', fontSize: isMobile ? '0.62rem' : '0.82rem',
           letterSpacing: '0.1em', textTransform: 'uppercase',
-          color: '#C9BFAD', marginBottom: '1.2rem', fontWeight: 500,
+          color: '#C9BFAD', marginBottom: isMobile ? '0.5rem' : '1.2rem', fontWeight: 500,
         }}>
           Tools · by projects shipped
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '0.32rem' : '0.55rem' }}>
           {skills.tools.map(t => {
             const op = Math.min(0.55 + t.count * 0.08, 1)
-            const fs = Math.min(0.8 + t.count * 0.03, 0.98)
+            const fs = Math.min(0.8 + t.count * 0.03, 0.98) * (isMobile ? 0.72 : 1)
             return (
               <div key={t.name} style={{
                 fontFamily: 'var(--font-label)', fontSize: `${fs}rem`, fontWeight: 500,
                 color: `rgba(${r},${g},${b},${op})`, letterSpacing: '0.03em',
-                padding: '0.45rem 0.85rem', border: `1px solid rgba(${r},${g},${b},${op * 0.6})`,
+                padding: isMobile ? '0.28rem 0.5rem' : '0.45rem 0.85rem', border: `1px solid rgba(${r},${g},${b},${op * 0.6})`,
                 whiteSpace: 'nowrap',
               }}>
                 {t.name}
-                <span style={{ color: 'rgba(245,239,227,0.5)', marginLeft: '0.4rem', fontSize: '0.75rem' }}>×{t.count}</span>
+                <span style={{ color: 'rgba(245,239,227,0.5)', marginLeft: '0.4rem', fontSize: isMobile ? '0.6rem' : '0.75rem' }}>×{t.count}</span>
               </div>
             )
           })}

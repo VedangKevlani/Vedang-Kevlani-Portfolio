@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 
-interface Props { label: string }
+interface Props { label: string; compact?: boolean }
 
-export default function SceneLabel({ label }: Props) {
+export default function SceneLabel({ label, compact = false }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const prev = useRef('')
 
@@ -21,8 +21,8 @@ export default function SceneLabel({ label }: Props) {
       ref={ref}
       style={{
         position: 'fixed',
-        bottom: '1.75rem',
-        left: '2.25rem',
+        bottom: compact ? '1rem' : '1.75rem',
+        left: compact ? '1rem' : '2.25rem',
         zIndex: 1000,
         fontFamily: 'var(--font-label)',
         fontSize: '0.525rem',

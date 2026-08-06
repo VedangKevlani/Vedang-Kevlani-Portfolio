@@ -23,14 +23,25 @@
 
 html, body {
   height: 100%;
+  width: 100%;
   background: var(--black);
   color: var(--parchment);
   overscroll-behavior: none;
+  overflow-x: hidden;
 }
 
 body { font-family: var(--font-label); font-weight: 300; overflow: hidden; }
 
 #root { height: 100vh; overflow: hidden; }
+
+/* Any long unbroken token (URLs, hyphen-free words) wraps instead of
+   forcing the page wider than the viewport on narrow screens. */
+p, h1, h2, h3, span, a, div {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+img, svg, video { max-width: 100%; }
 
 /* The whole site is one slide deck: a JS-driven track (see SlideDeck.tsx)
    moves via transform so one wheel/touch/key gesture = one chapter, in
