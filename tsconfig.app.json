@@ -15,5 +15,5 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["Vedang-Kevlani-Portfolio/src"]
+  "include": ["src"]
 }
